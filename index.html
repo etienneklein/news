@@ -313,8 +313,9 @@ Return 4-7 items. Be factual and current.`;
       const textBlock = data.content?.find(b => b.type === 'text');
       if (!textBlock) throw new Error('Keine Textantwort erhalten.');
 
-      let raw = textBlock.text.trim().replace(/^```json\s*/i, '').replace(/```$/, '').trim();
-      renderBriefing(JSON.parse(raw));
+      const jsonMatch = textBlock.text.match(/\{[\s\S]*\}/);
+		if (!jsonMatch) throw new Error('Kein JSON gefunden.');
+		renderBriefing(JSON.parse(jsonMatch[0]));
 
     } catch (e) {
       document.getElementById('errorMsg').textContent = '⚠ ' + e.message;
