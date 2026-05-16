@@ -313,8 +313,10 @@ Return 4-7 items. Be factual and current.`;
       const textBlock = data.content?.find(b => b.type === 'text');
       if (!textBlock) throw new Error('Keine Textantwort erhalten.');
 
-      const jsonMatch = textBlock.text.match(/\{[\s\S]*\}/);
-		if (!jsonMatch) throw new Error('Kein JSON gefunden.');
+		const allText = data.content?.filter(b => b.type === 'text').map(b => b.text).join('');
+		if (!allText) throw new Error('RAW: ' + JSON.stringify(data).slice(0, 300));
+		const jsonMatch = allText.match(/\{[\s\S]*\}/);
+		if (!jsonMatch) throw new Error('Kein JSON. Antwort: ' + allText.slice(0, 200));
 		renderBriefing(JSON.parse(jsonMatch[0]));
 
     } catch (e) {
