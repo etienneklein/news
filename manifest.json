@@ -2,7 +2,7 @@
   "name": "Propulsion Morning Brief",
   "short_name": "PropBrief",
   "description": "Daily space & rocket propulsion news briefing",
-  "start_url": "/",
+  "start_url": "/news/",
   "display": "standalone",
   "background_color": "#03040a",
   "theme_color": "#03040a",
