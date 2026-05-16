@@ -281,6 +281,13 @@ Return 4-7 items. Be factual and current.`;
 
   function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
   function esc(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+  function clean(s) {
+    return String(s || '')
+      .replace(/\[\d+\]/g, '')
+      .replace(/\(\[\d+\]\)/g, '')
+      .replace(/\s{2,}/g, ' ')
+      .trim();
+  }
 
   async function fetchBriefing() {
     show('loading-screen');
@@ -310,14 +317,11 @@ Return 4-7 items. Be factual and current.`;
       setStage(3);
       await delay(300);
 
-      const textBlock = data.content?.find(b => b.type === 'text');
-      if (!textBlock) throw new Error('Keine Textantwort erhalten.');
-
-		const allText = data.content?.filter(b => b.type === 'text').map(b => b.text).join('');
-		if (!allText) throw new Error('RAW: ' + JSON.stringify(data).slice(0, 300));
-		const jsonMatch = allText.match(/\{[\s\S]*\}/);
-		if (!jsonMatch) throw new Error('Kein JSON. Antwort: ' + allText.slice(0, 200));
-		renderBriefing(JSON.parse(jsonMatch[0]));
+      const allText = data.content?.filter(b => b.type === 'text').map(b => b.text).join('');
+      if (!allText) throw new Error('Keine Textantwort erhalten.');
+      const jsonMatch = allText.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) throw new Error('Kein JSON gefunden.');
+      renderBriefing(JSON.parse(jsonMatch[0]));
 
     } catch (e) {
       document.getElementById('errorMsg').textContent = '⚠ ' + e.message;
@@ -333,7 +337,7 @@ Return 4-7 items. Be factual and current.`;
     el.innerHTML += `
       <div class="headline-card">
         <div class="section-eyebrow" style="color:var(--green)">HEUTIGER ÜBERBLICK</div>
-        <div class="headline-text">${esc(b.headline)}</div>
+        <div class="headline-text">${esc(clean(b.headline))}</div>
       </div>`;
 
     b.items?.forEach(item => {
@@ -342,23 +346,23 @@ Return 4-7 items. Be factual and current.`;
         <div class="item cat-${item.category}">
           <div class="item-header">
             <span class="item-badge" style="color:${c.color};border-color:${c.color}44">${item.category}</span>
-            <span class="item-title">${esc(item.title)}</span>
+            <span class="item-title">${esc(clean(item.title))}</span>
           </div>
-          <div class="item-summary">${esc(item.summary)}</div>
-          <div class="item-sig" style="color:${c.color};border-color:${c.color}22">↳ ${esc(item.significance)}</div>
+          <div class="item-summary">${esc(clean(item.summary))}</div>
+          <div class="item-sig" style="color:${c.color};border-color:${c.color}22">↳ ${esc(clean(item.significance))}</div>
         </div>`;
     });
 
     if (b.propulsion_spotlight) el.innerHTML += `
       <div class="spotlight-card" style="margin-top:8px">
         <div class="section-eyebrow" style="color:var(--purple)">⚡ PROPULSION SPOTLIGHT</div>
-        <div class="spotlight-text">${esc(b.propulsion_spotlight)}</div>
+        <div class="spotlight-text">${esc(clean(b.propulsion_spotlight))}</div>
       </div>`;
 
     if (b.quote_of_day) el.innerHTML += `
       <div class="quote-card">
         <div class="section-eyebrow" style="color:#334">QUOTE OF THE DAY</div>
-        <div class="quote-text">"${esc(b.quote_of_day)}"</div>
+        <div class="quote-text">"${esc(clean(b.quote_of_day))}"</div>
       </div>`;
 
     el.innerHTML += `<button class="reload-btn" onclick="fetchBriefing()">↺ NEU LADEN</button>`;
